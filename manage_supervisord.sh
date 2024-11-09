@@ -77,18 +77,20 @@ install_supervisord() {
     sudo tee /usr/local/bin/systemctl > /dev/null <<EOL
 #!/bin/bash
 
+SUPERVISORCTL="/usr/bin/supervisorctl"
+
 case "\$1" in
     start)
-        sudo supervisorctl start \$2
+        \$SUPERVISORCTL start \$2
         ;;
     stop)
-        sudo supervisorctl stop \$2
+        \$SUPERVISORCTL stop \$2
         ;;
     restart)
-        sudo supervisorctl restart \$2
+        \$SUPERVISORCTL restart \$2
         ;;
     status)
-        sudo supervisorctl status \$2
+        \$SUPERVISORCTL status \$2
         ;;
     *)
         echo "Usage: \$0 {start|stop|restart|status} <service>"
