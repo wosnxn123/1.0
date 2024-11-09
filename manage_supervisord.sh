@@ -30,7 +30,7 @@ check_supervisord_installed() {
 
 # 检查 supervisord 状态
 check_supervisord_status() {
-    if systemctl is-active --quiet supervisord; then
+    if pgrep supervisord &> /dev/null; then
         echo "| 正在运行: 是               |"
     else
         echo "| 正在运行: 否               |"
@@ -55,7 +55,7 @@ show_menu() {
     echo "5) 退出"
 }
 
-# 安装 supervisord 并配置 systemctl 替代
+# 安装 supervisord 并配置
 install_supervisord() {
     echo "正在安装 supervisord..."
     sudo apt update
@@ -70,31 +70,8 @@ install_supervisord() {
     echo "添加 include 配置..."
     sudo sed -i '/\[include\]/a files = /etc/supervisor/conf.d/*.conf' /etc/supervisor/supervisord.conf
 
-    echo "创建 supervisord 服务文件..."
-    sudo tee /etc/systemd/system/supervisord.service > /dev/null <<EOL
-[Unit]
-Description=Supervisor process control system
-Documentation=http://supervisord.org
-After=network.target
-
-[Service]
-ExecStart=/usr/bin/supervisord -c /etc/supervisor/supervisord.conf
-ExecStop=/usr/bin/supervisorctl shutdown
-ExecReload=/usr/bin/supervisorctl reload
-KillMode=process
-Restart=on-failure
-RestartSec=42s
-
-[Install]
-WantedBy=multi-user.target
-EOL
-
-    echo "重新加载 systemd 配置..."
-    sudo systemctl daemon-reload
-
-    echo "启用并启动 supervisord 服务..."
-    sudo systemctl enable supervisord
-    sudo systemctl start supervisord
+    echo "启动 supervisord..."
+    sudo supervisord -c /etc/supervisor/supervisord.conf
 
     echo "创建自定义 systemctl 脚本..."
     sudo tee /usr/local/bin/systemctl > /dev/null <<EOL
@@ -129,10 +106,7 @@ EOL
 # 删除 supervisord 和自定义 systemctl 脚本
 remove_supervisord() {
     echo "正在删除 supervisord..."
-    sudo systemctl stop supervisord
-    sudo systemctl disable supervisord
-    sudo rm /etc/systemd/system/supervisord.service
-    sudo systemctl daemon-reload
+    sudo supervisorctl shutdown
     sudo apt remove -y supervisor
     sudo rm -rf /etc/supervisor
     sudo rm /usr/local/bin/systemctl
@@ -148,7 +122,7 @@ check_status() {
 # 重启 supervisord
 restart_supervisord() {
     echo "重启 supervisord..."
-    sudo systemctl restart supervisord
+    sudo supervisorctl reload
     echo "重启完成。"
 }
 
