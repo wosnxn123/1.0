@@ -1,0 +1,22 @@
+[monitoring]
+interval = 1000  # 监控间隔(ms)
+
+[metrics]
+fps = true
+cpu = true
+gpu = true
+memory = true
+thermal = true
+
+[optimization]
+adaptive = true
+min_fps = 30
+max_cpu_usage = 80
+max_gpu_usage = 70
+max_temperature = 45
+
+[ai]
+learning_rate = 0.01
+exploration_rate = 0.1
+memory_size = 1000
+batch_size = 32
